@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ZXCBank release control room</title>
+  <style>
+    :root { color-scheme: light; }
+    body { margin: 0; background: #fff; color: #1c1c1c; font-family: Helvetica, Arial, sans-serif; }
+    header, main { padding: 20px 28px; }
+    header { display: flex; justify-content: space-between; gap: 24px; align-items: flex-end; border-bottom: 4px solid #1c1c1c; }
+    h1 { margin: 0; font-size: 36px; font-weight: 650; }
+    h2 { margin: 28px 0 12px; font-size: 22px; }
+    p { margin: 6px 0; }
+    button, .dot { font: inherit; }
+    #refresh { background: #fff; color: #ff6308; border: 2px solid #ff6308; padding: 8px 14px; cursor: pointer; }
+    .badge { background: #ff6308; color: #fff; padding: 4px 8px; margin-right: 8px; }
+    .tiles { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+    .tile { border: 1px solid #ddd; padding: 12px; min-height: 92px; }
+    .tile b { display: block; font-size: 36px; line-height: 1.1; }
+    .board { overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border-bottom: 1px solid #eee; padding: 8px; text-align: left; vertical-align: top; }
+    th.lane-dev, th.lane-git, th.lane-bot, th.lane-human { font-size: 12px; font-weight: 600; }
+    th.lane-bot, .bot-name { color: #ff6308; }
+    th.lane-human, .human { color: #178a3d; }
+    .release { min-width: 180px; }
+    .dot { width: 28px; height: 28px; border-radius: 50%; border: 0; cursor: pointer; }
+    .pending { background: #c8c8c8; }
+    .working { background: #2f6fed; }
+    .done { background: #178a3d; }
+    .blocked { background: #c62828; }
+    .waiting { background: #e6a100; }
+    .bots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .card { border: 1px solid #ff6308; padding: 12px; }
+    .card.stalled { background: #fff4ec; }
+    #detail { border-left: 4px solid #1c1c1c; padding: 12px 16px; margin-top: 12px; }
+    a { color: #9a3d00; }
+    ol { padding-left: 18px; }
+    li { margin: 6px 0; }
+    details img { max-width: 100%; margin-top: 12px; }
+    @media (max-width: 1100px) {
+      .tiles, .bots { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>ZXCBank release control room</h1>
+      <p id="asof">Data as of —</p>
+      <p id="unavailable"></p>
+    </div>
+    <div>
+      <span id="badge"></span>
+      <span id="ago">Updated —</span>
+      <button id="refresh" type="button">Refresh</button>
+    </div>
+  </header>
+  <main>
+    <section class="tiles" id="tiles"></section>
+    <h2>Flow board</h2>
+    <div class="board" id="board"></div>
+    <div id="detail" hidden></div>
+    <h2>Bots</h2>
+    <div class="bots" id="bots"></div>
+    <h2>Needs attention</h2>
+    <ul id="attention"></ul>
+    <h2>Audit feed</h2>
+    <ol id="audit"></ol>
+    <details>
+      <summary>How this works</summary>
+      <img src="ZXCBank_release_flow.drawio.png" alt="ZXCBank release flow, steps 1 to 10 across four lanes">
+    </details>
+  </main>
+  <script>
+    const TILES = [
+      ["in_flight", "Releases in flight"],
+      ["blocked", "Blocked by security"],
+      ["waiting_signoff", "Waiting for human sign-off"],
+      ["merged_this_week", "Merged this week"],
+      ["avg_hours_open_to_merge", "Average hours from PR opened to merged"],
+      ["avg_pipeline_minutes", "Average pipeline minutes (last 30 days)"]
+    ];
+    let generatedAt = null;
+
+    function esc(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (ch) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[ch]));
+    }
+
+    function sgt(iso) {
+      if (!iso) return "—";
+      const text = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Asia/Singapore", dateStyle: "medium", timeStyle: "short"
+      }).format(new Date(iso));
+      return text + " SGT";
+    }
+
+    function num(value) {
+      return value === null || value === undefined ? "—" : String(value);
+    }
+
+    async function load() {
+      try {
+        const response = await fetch("data.json", { cache: "no-store" });
+        if (!response.ok) throw new Error("missing");
+        return { data: await response.json(), sample: false };
+      } catch (err) {
+        const response = await fetch("sample_data.json", { cache: "no-store" });
+        return { data: await response.json(), sample: true };
+      }
+    }
+
+    function render(data, sample) {
+      generatedAt = data.generated_at;
+      document.getElementById("asof").textContent = "Data as of " + sgt(data.generated_at);
+      document.getElementById("badge").innerHTML = sample ? '<span class="badge">Sample data</span>' : "";
+      const missing = data.unavailable || [];
+      document.getElementById("unavailable").textContent = missing.length ? "Not available: " + missing.join(", ") : "";
+      document.getElementById("tiles").innerHTML = TILES.map(([key, label]) =>
+        `<article class="tile"><b>${esc(num(data.tiles[key]))}</b>${esc(label)}</article>`
+      ).join("");
+      const steps = data.steps || [];
+      const laneClass = {
+        "Developer + Cursor": "lane-dev",
+        "GitHub": "lane-git",
+        "Grok Bot team": "lane-bot",
+        "People + audit": "lane-human"
+      };
+      const head = steps.map((step) =>
+        `<th class="${laneClass[step.lane] || ""}">${step.id}. ${esc(step.name)}<br>${esc(step.lane)}</th>`
+      ).join("");
+      const rows = (data.releases || []).map((release, index) => {
+        const fixes = (release.fix_prs || []).map((pr) => `<div>Fix PR <a href="${esc(pr.url)}">#${esc(pr.number)}</a></div>`).join("");
+        const mail = release.reporter && release.reporter.sent
+          ? `<div class="bot-name">${esc(release.reporter.summary)}</div>` : "";
+        const dots = release.steps.map((step) =>
+          `<td><button class="dot ${esc(step.status)}" data-release="${index}" data-step="${step.id}" aria-label="Step ${step.id} ${esc(step.status)}"></button></td>`
+        ).join("");
+        const merged = release.merged_at ? "Merged" : "In flight";
+        return `<tr><th class="release"><a href="${esc(release.url)}">#${esc(release.number)} ${esc(release.title)}</a><div>${esc(merged)}</div>${fixes}${mail}</th>${dots}</tr>`;
+      }).join("");
+      document.getElementById("board").innerHTML = `<table><thead><tr><th>Release</th>${head}</tr></thead><tbody>${rows || "<tr><td>No releases</td></tr>"}</tbody></table>`;
+      document.getElementById("board").querySelectorAll(".dot").forEach((button) => {
+        button.addEventListener("click", () => showDetail(data, button));
+      });
+      document.getElementById("bots").innerHTML = (data.bots || []).map((bot) =>
+        `<article class="card ${bot.status === "stalled" ? "stalled" : ""}"><div class="bot-name">${esc(bot.name)}</div><p>${esc(bot.last_action)}</p><p>${esc(sgt(bot.at))}</p><p>${esc(bot.status)} · ${esc(bot.working_on)} in progress</p></article>`
+      ).join("");
+      const attention = data.attention || [];
+      document.getElementById("attention").innerHTML = attention.length ? attention.map((item) =>
+        `<li><a href="${esc(item.url)}">#${esc(item.release)} ${esc(item.title)}</a> — ${esc(item.reason)}. Owner: ${esc(item.owner)}. ${esc(item.step)}.</li>`
+      ).join("") : "<li>Nothing needs attention.</li>";
+      const audit = data.audit || [];
+      document.getElementById("audit").innerHTML = audit.length ? audit.map((item) =>
+        `<li>${esc(sgt(item.at))} — <a href="${esc(item.url)}">${esc(item.text)}</a></li>`
+      ).join("") : "<li>No events yet.</li>";
+      updateAgo();
+    }
+
+    function showDetail(data, button) {
+      const release = data.releases[Number(button.dataset.release)];
+      const step = release.steps.find((item) => item.id === Number(button.dataset.step));
+      const ownerClass = step.owner === "Security approver" ? "human" : "bot-name";
+      document.getElementById("detail").hidden = false;
+      document.getElementById("detail").innerHTML =
+        `<h3>Step ${step.id}. ${esc(step.name)}</h3><p>${esc(step.detail)}</p><p class="${ownerClass}">${esc(step.owner)} · ${esc(step.status)}</p><p>${esc(sgt(step.at))}</p><p><a href="${esc(step.url)}">Open on GitHub</a></p>`;
+    }
+
+    function updateAgo() {
+      if (!generatedAt) return;
+      const seconds = Math.max(0, Math.round((Date.now() - new Date(generatedAt).getTime()) / 1000));
+      document.getElementById("ago").textContent = "Updated " + seconds + " seconds ago";
+    }
+
+    async function refresh() {
+      const loaded = await load();
+      render(loaded.data, loaded.sample);
+    }
+
+    document.getElementById("refresh").addEventListener("click", refresh);
+    refresh();
+    setInterval(refresh, 30000);
+    setInterval(updateAgo, 1000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "generated_at": "2026-10-23T11:55:00Z",
+  "repository": "izhcong1997/zxcbank-repo",
+  "source": "sample",
+  "unavailable": [],
+  "tiles": {
+    "in_flight": 2,
+    "blocked": 1,
+    "waiting_signoff": 1,
+    "merged_this_week": 1,
+    "avg_hours_open_to_merge": 26,
+    "avg_pipeline_minutes": 11
+  },
+  "lanes": ["Developer + Cursor", "GitHub", "Grok Bot team", "People + audit"],
+  "steps": [
+    {"id": 1, "name": "Code pushed", "lane": "Developer + Cursor", "owner": "Developer"},
+    {"id": 2, "name": "PR opened to main", "lane": "GitHub", "owner": "GitHub"},
+    {"id": 3, "name": "Checks run", "lane": "GitHub", "owner": "GitHub"},
+    {"id": 4, "name": "Security Analyst verdict", "lane": "Grok Bot team", "owner": "Security Analyst"},
+    {"id": 5, "name": "Fixer called", "lane": "Grok Bot team", "owner": "Fixer"},
+    {"id": 6, "name": "Cursor Cloud Agent fixing", "lane": "Developer + Cursor", "owner": "Fixer"},
+    {"id": 7, "name": "Fix PR opened", "lane": "GitHub", "owner": "Fixer"},
+    {"id": 8, "name": "Security re-check", "lane": "Grok Bot team", "owner": "Security Analyst"},
+    {"id": 9, "name": "Release Captain sign-off", "lane": "Grok Bot team", "owner": "Release Captain"},
+    {"id": 10, "name": "Human approved and merged", "lane": "People + audit", "owner": "Security approver"}
+  ],
+  "releases": [
+    {
+      "number": 128,
+      "title": "Daily transfer limit",
+      "url": "https://github.com/izhcong1997/zxcbank-repo/pull/128",
+      "author": "ycyc",
+      "branch": "feature/daily-limit",
+      "merged_at": "2026-10-23T04:00:00Z",
+      "created_at": "2026-10-22T02:00:00Z",
+      "fix_prs": [{"number": 129, "title": "Cap the daily limit check", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/129"}],
+      "reporter": {"summary": "Emailed Sean: Ready", "at": "2026-10-23T03:40:00Z", "sent": true},
+      "steps": [
+        {"id": 1, "name": "Code pushed", "lane": "Developer + Cursor", "owner": "Developer", "status": "done", "detail": "Branch feature/daily-limit", "at": "2026-10-22T02:00:00Z", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/128"},
+        {"id": 2, "name": "PR opened to main", "lane": "GitHub", "owner": "GitHub", "status": "done", "detail": "PR #128 opened to main", "at": "2026-10-22T02:05:00Z", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/128"},
+        {"id": 3, "name": "Checks run", "lane": "GitHub", "owner": "GitHub", "status": "done", "detail": "Passed: tests, CodeQL, AI Scan, Dependabot, Copilot Autofix", "at": "2026-10-22T02:20:00Z", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/128"},
+        {"id": 4, "name": "Security Analyst verdict", "lane": "Grok Bot team", "owner": "Security Analyst", "status": "done", "detail": "Report v1 BLOCKED. Limit check can be skipped.", "at": "2026-10-22T03:00:00Z", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/128"},
+        {"id": 5, "name": "Fixer called", "lane": "Grok Bot team", "owner": "Fixer", "status": "done", "detail": "Fixer called Cursor to patch the limit check.", "at": "2026-10-22T03:10:00Z", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/128"},
+        {"id": 6, "name": "Cursor Cloud Agent fixing", "lane": "Developer + Cursor", "owner": "Fixer", "status": "done", "detail": "Cloud Agent wrote the fix on branch cursor/daily-limit.", "at": "2026-10-22T04:00:00Z", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/129"},
+        {"id": 7, "name": "Fix PR opened", "lane": "GitHub", "owner": "Fixer", "status": "done", "detail": "Fix PR #129", "at": "2026-10-22T04:20:00Z", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/129"},
+        {"id": 8, "name": "Security re-check", "lane": "Grok Bot team", "owner": "Security Analyst", "status": "done", "detail": "Report v2 OK TO PROCEED.", "at": "2026-10-23T02:00:00Z", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/128"},
+        {"id": 9, "name": "Release Captain sign-off", "lane": "Grok Bot team", "owner": "Release Captain", "status": "done", "detail": "Sign-off pack sent to the security approver.", "at": "2026-10-23T03:00:00Z", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/128"},
+        {"id": 10, "name": "Human approved and merged", "lane": "People + audit", "owner": "Security approver", "status": "done", "detail": "Sean approved and the PR merged to main.", "at": "2026-10-23T04:00:00Z", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/128"}
+      ]
+    },
+    {
+      "number": 136,
+      "title": "Card fee rounding",
+      "url": "https://github.com/izhcong1997/zxcbank-repo/pull/136",
+      "author": "ycyc",
+      "branch": "feature/card-fees",
+      "merged_at": null,
+      "created_at": "2026-10-23T01:00:00Z",
+      "fix_prs": [{"number": 137, "title": "Round fees half up", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/137"}],
+      "reporter": {"summary": "Emailed Sean: Ready", "at": "2026-10-23T06:10:00Z", "sent": true},
+      "steps": [
+        {"id": 1, "name": "Code pushed", "lane": "Developer + Cursor", "owner": "Developer", "status": "done", "detail": "Branch feature/card-fees", "at": "2026-10-23T01:00:00Z", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/136"},
+        {"id": 2, "name": "PR opened to main", "lane": "GitHub", "owner": "GitHub", "status": "done", "detail": "PR #136 opened to main", "at": "2026-10-23T01:05:00Z", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/136"},
+        {"id": 3, "name": "Checks run", "lane": "GitHub", "owner": "GitHub", "status": "done", "detail": "Passed: tests, CodeQL, AI Scan, Dependabot, Copilot Autofix", "at": "2026-10-23T01:20:00Z", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/136"},
+        {"id": 4, "name": "Security Analyst verdict", "lane": "Grok Bot team", "owner": "Security Analyst", "status": "done", "detail": "Report v1 BLOCKED. Rounding can undercharge.", "at": "2026-10-23T02:00:00Z", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/136"},
+        {"id": 5, "name": "Fixer called", "lane": "Grok Bot team", "owner": "Fixer", "status": "done", "detail": "Fixer called Cursor.", "at": "2026-10-23T02:10:00Z", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/136"},
+        {"id": 6, "name": "Cursor Cloud Agent fixing", "lane": "Developer + Cursor", "owner": "Fixer", "status": "done", "detail": "Cloud Agent opened the fee fix.", "at": "2026-10-23T03:00:00Z", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/137"},
+        {"id": 7, "name": "Fix PR opened", "lane": "GitHub", "owner": "Fixer", "status": "done", "detail": "Fix PR #137", "at": "2026-10-23T03:15:00Z", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/137"},
+        {"id": 8, "name": "Security re-check", "lane": "Grok Bot team", "owner": "Security Analyst", "status": "done", "detail": "Report v2 OK TO PROCEED.", "at": "2026-10-23T05:30:00Z", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/136"},
+        {"id": 9, "name": "Release Captain sign-off", "lane": "Grok Bot team", "owner": "Release Captain", "status": "waiting", "detail": "Sign-off pack is waiting for a human.", "at": "2026-10-23T07:00:00Z", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/136"},
+        {"id": 10, "name": "Human approved and merged", "lane": "People + audit", "owner": "Security approver", "status": "pending", "detail": "Not merged yet.", "at": null, "url": "https://github.com/izhcong1997/zxcbank-repo/pull/136"}
+      ]
+    },
+    {
+      "number": 141,
+      "title": "Transfer note search",
+      "url": "https://github.com/izhcong1997/zxcbank-repo/pull/141",
+      "author": "ycyc",
+      "branch": "feature/transfer-search",
+      "merged_at": null,
+      "created_at": "2026-10-23T08:00:00Z",
+      "fix_prs": [],
+      "reporter": {"summary": "Emailed Sean: Blocked", "at": "2026-10-23T09:50:00Z", "sent": true},
+      "steps": [
+        {"id": 1, "name": "Code pushed", "lane": "Developer + Cursor", "owner": "Developer", "status": "done", "detail": "Branch feature/transfer-search", "at": "2026-10-23T08:00:00Z", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/141"},
+        {"id": 2, "name": "PR opened to main", "lane": "GitHub", "owner": "GitHub", "status": "done", "detail": "PR #141 opened to main", "at": "2026-10-23T08:05:00Z", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/141"},
+        {"id": 3, "name": "Checks run", "lane": "GitHub", "owner": "GitHub", "status": "done", "detail": "Passed: tests, CodeQL, AI Scan, Dependabot", "at": "2026-10-23T08:20:00Z", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/141"},
+        {"id": 4, "name": "Security Analyst verdict", "lane": "Grok Bot team", "owner": "Security Analyst", "status": "blocked", "detail": "Report v1 BLOCKED. The search filter is passed straight into the database.", "at": "2026-10-23T09:40:00Z", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/141"},
+        {"id": 5, "name": "Fixer called", "lane": "Grok Bot team", "owner": "Fixer", "status": "working", "detail": "Fixer is calling the Cursor API.", "at": "2026-10-23T11:25:00Z", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/141"},
+        {"id": 6, "name": "Cursor Cloud Agent fixing", "lane": "Developer + Cursor", "owner": "Fixer", "status": "pending", "detail": "Not started.", "at": null, "url": "https://github.com/izhcong1997/zxcbank-repo/pull/141"},
+        {"id": 7, "name": "Fix PR opened", "lane": "GitHub", "owner": "Fixer", "status": "pending", "detail": "No fix PR yet.", "at": null, "url": "https://github.com/izhcong1997/zxcbank-repo/pull/141"},
+        {"id": 8, "name": "Security re-check", "lane": "Grok Bot team", "owner": "Security Analyst", "status": "pending", "detail": "Waiting for a fix.", "at": null, "url": "https://github.com/izhcong1997/zxcbank-repo/pull/141"},
+        {"id": 9, "name": "Release Captain sign-off", "lane": "Grok Bot team", "owner": "Release Captain", "status": "pending", "detail": "Not ready.", "at": null, "url": "https://github.com/izhcong1997/zxcbank-repo/pull/141"},
+        {"id": 10, "name": "Human approved and merged", "lane": "People + audit", "owner": "Security approver", "status": "pending", "detail": "Not merged.", "at": null, "url": "https://github.com/izhcong1997/zxcbank-repo/pull/141"}
+      ]
+    }
+  ],
+  "bots": [
+    {"id": "release-captain", "name": "Release Captain", "last_action": "Sign-off pack for #136 is waiting for a human.", "at": "2026-10-23T07:00:00Z", "status": "working", "working_on": 1},
+    {"id": "security-analyst", "name": "Security Analyst", "last_action": "Report v1 BLOCKED on #141.", "at": "2026-10-23T09:40:00Z", "status": "done", "working_on": 0},
+    {"id": "fixer", "name": "Fixer", "last_action": "Calling Cursor Cloud Agent for #141.", "at": "2026-10-23T11:25:00Z", "status": "stalled", "working_on": 1},
+    {"id": "business-reporter", "name": "Business Reporter", "last_action": "Emailed Sean: Blocked on #141.", "at": "2026-10-23T09:50:00Z", "status": "done", "working_on": 0}
+  ],
+  "attention": [
+    {"release": 141, "title": "Transfer note search", "step": "Fixer called", "reason": "Stalled for more than 20 minutes", "owner": "Fixer", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/141", "at": "2026-10-23T11:25:00Z"},
+    {"release": 141, "title": "Transfer note search", "step": "Security Analyst verdict", "reason": "Blocked for more than 1 hour", "owner": "Security Analyst", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/141", "at": "2026-10-23T09:40:00Z"},
+    {"release": 136, "title": "Card fee rounding", "step": "Release Captain sign-off", "reason": "Waiting for sign-off for more than 4 hours", "owner": "Security approver", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/136", "at": "2026-10-23T07:00:00Z"}
+  ],
+  "audit": [
+    {"at": "2026-10-23T11:25:00Z", "kind": "marker", "text": "fixer step 5: Calling Cursor Cloud Agent for #141.", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/141"},
+    {"at": "2026-10-23T09:50:00Z", "kind": "marker", "text": "business-reporter: Emailed Sean: Blocked on #141.", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/141"},
+    {"at": "2026-10-23T09:40:00Z", "kind": "label", "text": "#141 labeled security:blocked", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/141"},
+    {"at": "2026-10-23T07:00:00Z", "kind": "marker", "text": "release-captain step 9: Sign-off pack for #136 is waiting for a human.", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/136"},
+    {"at": "2026-10-23T06:10:00Z", "kind": "marker", "text": "business-reporter: Emailed Sean: Ready for #136.", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/136"},
+    {"at": "2026-10-23T05:30:00Z", "kind": "label", "text": "#136 labeled security:ok", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/136"},
+    {"at": "2026-10-23T04:00:00Z", "kind": "merge", "text": "#128 merged to main", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/128"},
+    {"at": "2026-10-23T03:50:00Z", "kind": "approval", "text": "#128 approved by the security approver", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/128"},
+    {"at": "2026-10-23T03:15:00Z", "kind": "marker", "text": "fixer step 7: Fix PR #137 opened.", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/137"},
+    {"at": "2026-10-22T04:20:00Z", "kind": "marker", "text": "fixer step 7: Fix PR #129 opened.", "url": "https://github.com/izhcong1997/zxcbank-repo/pull/129"}
+  ]
+}
