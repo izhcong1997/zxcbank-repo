@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ZXC Bank</title>
+  <style>
+    body {
+      margin: 0;
+      background: #ffffff;
+      color: #0b1f3a;
+      font-family: Helvetica, Arial, sans-serif;
+    }
+    header {
+      background: #0b1f3a;
+      color: #ffffff;
+      padding: 28px 32px;
+    }
+    h1, h2 { font-weight: 500; margin: 0; }
+    main { max-width: 560px; margin: 0 auto; padding: 32px 20px 48px; }
+    h2 { margin-bottom: 8px; }
+    label { display: block; margin-top: 16px; }
+    input {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 6px;
+      padding: 10px;
+      border: 1px solid #0b1f3a;
+      background: #ffffff;
+      color: #0b1f3a;
+    }
+    button {
+      margin-top: 20px;
+      background: #0b1f3a;
+      color: #ffffff;
+      border: 0;
+      padding: 12px 18px;
+      font-size: 16px;
+    }
+    .error { color: #8f1d1d; }
+    .ok { margin-top: 20px; font-weight: 600; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    th, td { text-align: left; border-bottom: 1px solid #0b1f3a; padding: 8px 4px; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Hello from ZXC Bank</h1>
+  </header>
+  <main>
+    <h2>Send money</h2>
+    {% if errors %}
+      <ul class="error">
+        {% for error in errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    {% if message %}
+      <p class="ok">{{ message }}</p>
+    {% endif %}
+    <form method="post" action="/transfer">
+      <label>
+        From account
+        <input name="from_account" inputmode="numeric" value="{{ form.from_account if form else '' }}">
+      </label>
+      <label>
+        To account
+        <input name="to_account" inputmode="numeric" value="{{ form.to_account if form else '' }}">
+      </label>
+      <label>
+        Amount (SGD)
+        <input name="amount" inputmode="decimal" value="{{ form.amount if form else '' }}">
+      </label>
+      <label>
+        Note
+        <input name="note" value="{{ form.note if form else '' }}">
+      </label>
+      <button type="submit">Send money</button>
+    </form>
+    {% if transfers %}
+      <h2 style="margin-top: 32px;">Last 5 transfers</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>When</th>
+            <th>From</th>
+            <th>To</th>
+            <th>SGD</th>
+            <th>Status</th>
+            <th>Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in transfers %}
+            <tr>
+              <td>{{ row.timestamp }}</td>
+              <td>{{ row.from_account }}</td>
+              <td>{{ row.to_account }}</td>
+              <td>{{ row.amount }}</td>
+              <td>{{ row.status }}</td>
+              <td>{{ row.note }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  </main>
+</body>
+</html>

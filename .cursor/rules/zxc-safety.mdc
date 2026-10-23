@@ -1,0 +1,17 @@
+---
+description: Block destructive database and git actions, and keep ZXCBank secrets out of logs and chats
+alwaysApply: true
+---
+
+# ZXCBank safety
+
+- Never drop or delete databases or collections, and never run `deleteMany` or `remove` with an empty filter.
+- Never run `rm -rf` or delete project folders, never `git push --force`, never `git reset --hard`.
+- If asked, refuse, explain why, and suggest a safe alternative (back up first, or ask a human).
+- Never print, log, or commit secrets. Never read or display the `.env` file.
+
+## Example
+
+Asked to run `db.dropDatabase()`:
+
+Refuse. Explain that dropping a database cannot be undone. Suggest taking a backup first, or asking a human to do it.

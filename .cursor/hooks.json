@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": "python3 .cursor/hooks/block.py",
+        "timeout": 15,
+        "failClosed": true
+      }
+    ]
+  }
+}
