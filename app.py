@@ -1,9 +1,11 @@
+import json
 import re
 from datetime import datetime, timezone
 
 from flask import Flask, jsonify, render_template, request
 
 from db import get_transfers
+from fraud_check import check_transfer
 
 app = Flask(__name__)
 
@@ -86,12 +88,31 @@ def transfer():
             "status": "Completed",
         }
     )
+    check_transfer(parsed)
     return render_template(
         "index.html",
         message="Transfer sent",
         transfers=recent_transfers(),
         form=parsed,
     )
+
+
+@app.get("/transfers/search")
+def search_transfers():
+    raw = request.args.get("q") or "{}"
+    docs = list(get_transfers().find(json.loads(raw)))  # INTENTIONAL VULNERABILITY FOR DEMO
+    rows = []
+    for doc in docs:
+        check_transfer(doc)
+        rows.append(
+            {
+                "from_account": doc.get("from_account"),
+                "to_account": doc.get("to_account"),
+                "amount": doc.get("amount"),
+                "status": doc.get("status"),
+            }
+        )
+    return render_template("search.html", transfers=rows, query=raw)
 
 
 @app.get("/health")
