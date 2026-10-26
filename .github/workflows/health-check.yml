@@ -1,0 +1,83 @@
+name: Health check
+
+on:
+  workflow_dispatch:
+  # Uncomment for the demo. Every 10 minutes.
+  # schedule:
+  #   - cron: "*/10 * * * *"
+
+permissions:
+  contents: read
+  deployments: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.lookup.outputs.version }}
+      previous: ${{ steps.lookup.outputs.previous }}
+      failed: ${{ steps.result.outputs.failed }}
+    steps:
+      - name: Check out default branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - name: Find production version
+        id: lookup
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 ops/incident_flow.py lookup
+
+      - name: Check out deployed tag
+        if: steps.lookup.outputs.deployed == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.lookup.outputs.version }}
+          path: release
+          persist-credentials: false
+
+      - name: Set up Python
+        if: steps.lookup.outputs.deployed == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        if: steps.lookup.outputs.deployed == 'true'
+        working-directory: release
+        run: pip install -r requirements.txt
+
+      - name: Run health test
+        id: health
+        if: steps.lookup.outputs.deployed == 'true'
+        working-directory: release
+        run: python -m pytest tests/test_health.py --rootdir=. --import-mode=importlib
+
+      - name: Record health result
+        id: result
+        if: always()
+        run: |
+          if [ "${{ steps.health.outcome }}" = "failure" ]; then
+            echo "failed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "failed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Close incident when healthy
+        if: steps.health.outcome == 'success'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEPLOYED_VERSION: ${{ steps.lookup.outputs.version }}
+        run: python3 ops/incident_flow.py resolve
+
+  page:
+    needs: check
+    if: always() && needs.check.outputs.failed == 'true'
+    uses: ./.github/workflows/zxc-pager.yml
+    with:
+      deployed_version: ${{ needs.check.outputs.version }}
+      previous_good_version: ${{ needs.check.outputs.previous }}
+    secrets: inherit

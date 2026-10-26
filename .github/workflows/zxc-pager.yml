@@ -1,0 +1,48 @@
+name: ZXC Pager
+
+on:
+  workflow_dispatch:
+    inputs:
+      deployed_version:
+        description: Deployed version. Looked up when left empty.
+        required: false
+        type: string
+      previous_good_version:
+        description: Previous good version. Looked up when left empty.
+        required: false
+        type: string
+  workflow_call:
+    inputs:
+      deployed_version:
+        required: false
+        type: string
+        default: ""
+      previous_good_version:
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+  deployments: read
+  issues: write
+
+jobs:
+  page:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out default branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - name: Open the incident
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEPLOYED_VERSION: ${{ inputs.deployed_version }}
+          PREVIOUS_GOOD_VERSION: ${{ inputs.previous_good_version }}
+          RUN_LINK: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          GROK_INCIDENT_URL: ${{ secrets.GROK_INCIDENT_URL }}
+          GROK_INCIDENT_KEY: ${{ secrets.GROK_INCIDENT_KEY }}
+        run: python3 ops/incident_flow.py page

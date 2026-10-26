@@ -233,7 +233,45 @@ def catalog():
     return [{"id": number, "name": name, "lane": lane, "owner": owner} for number, name, lane, owner in STEPS]
 
 
-def build(repo, pulls, comments, checks, events, runs, unavailable, now):
+def production_snapshot(repo, deployments, status_map, issues):
+    version = None
+    deployed_at = None
+    if deployments is not None:
+        for deployment in deployments:
+            states = status_map.get(deployment.get("id")) or []
+            latest = states[0] if states else {}
+            if latest.get("state") == "success":
+                version = deployment.get("ref") or None
+                deployed_at = iso(latest.get("created_at") or deployment.get("created_at"))
+                break
+    incidents = []
+    if issues is not None:
+        for issue in issues:
+            if "pull_request" in issue:
+                continue
+            labels = []
+            for label in issue.get("labels") or []:
+                name = label.get("name") if isinstance(label, dict) else str(label)
+                if name:
+                    labels.append(name)
+            incidents.append(
+                {
+                    "number": issue.get("number"),
+                    "title": redact(issue.get("title") or ""),
+                    "url": issue.get("html_url") or "",
+                    "labels": labels,
+                    "opened_at": iso(issue.get("created_at")),
+                }
+            )
+    return {
+        "version": version,
+        "deployed_at": deployed_at,
+        "url": f"https://github.com/{repo}/deployments" if version else None,
+        "incidents": incidents,
+    }
+
+
+def build(repo, pulls, comments, checks, events, runs, unavailable, now, production):
     by_id = {pr["number"]: pr for pr in pulls}
     children = {}
     primaries = []
@@ -356,6 +394,7 @@ def build(repo, pulls, comments, checks, events, runs, unavailable, now):
         "source": "github",
         "unavailable": sorted(set(unavailable)),
         "tiles": tiles,
+        "production": production,
         "lanes": ["Developer + Cursor", "GitHub", "Grok Bot team", "People + audit"],
         "steps": catalog(),
         "releases": releases,
@@ -424,7 +463,37 @@ def load_github(repo, token):
     _, problem = github_get(session, f"{API}/repos/{repo}/code-scanning/alerts", {"state": "open", "per_page": 1})
     if problem:
         unavailable.append("code_scanning")
-    return build(repo, pulls, comments, checks, events, action_runs or [], unavailable, now)
+    deployments, problem = github_get(
+        session,
+        f"{API}/repos/{repo}/deployments",
+        {"environment": "production", "per_page": 20},
+    )
+    status_map = {}
+    if problem or not isinstance(deployments, list):
+        unavailable.append("deployments")
+        deployments = None
+    else:
+        for deployment in deployments[:10]:
+            statuses, problem = github_get(
+                session,
+                f"{API}/repos/{repo}/deployments/{deployment.get('id')}/statuses",
+                {"per_page": 5},
+            )
+            if problem or not isinstance(statuses, list):
+                unavailable.append("deployments")
+                deployments = None
+                break
+            status_map[deployment.get("id")] = statuses
+    issues, problem = github_get(
+        session,
+        f"{API}/repos/{repo}/issues",
+        {"state": "open", "labels": "incident", "per_page": 20},
+    )
+    if problem or not isinstance(issues, list):
+        unavailable.append("incidents")
+        issues = None
+    production = production_snapshot(repo, deployments, status_map, issues)
+    return build(repo, pulls, comments, checks, events, action_runs or [], unavailable, now, production)
 
 
 def write_data():
