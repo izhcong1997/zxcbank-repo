@@ -24,6 +24,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.compare.outputs.changed }}
+      summary: ${{ steps.compare.outputs.summary }}
     steps:
       - name: Check out default branch
         uses: actions/checkout@v4
@@ -45,6 +48,18 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: python monitoring-db/fetch_data.py
 
+      - name: Download the published control room
+        run: |
+          code=$(curl -sS -o "$RUNNER_TEMP/previous-data.json" -w '%{http_code}' https://izhcong1997.github.io/zxcbank-repo/data.json || echo 000)
+          if [ "$code" != "200" ] || ! python -c 'import json,sys; json.load(open(sys.argv[1]))' "$RUNNER_TEMP/previous-data.json"; then
+            echo "Published data.json is not available ($code). Comparing with an empty room."
+            printf '%s\n' '{"releases":[],"steps":[],"attention":[],"production":{"version":null,"incidents":[]}}' > "$RUNNER_TEMP/previous-data.json"
+          fi
+
+      - name: Compare with the published control room
+        id: compare
+        run: python monitoring-db/compare_control_room.py compare "$RUNNER_TEMP/previous-data.json" monitoring-db/data.json
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
@@ -63,3 +78,28 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  notify:
+    needs: [build, deploy]
+    if: needs.deploy.result == 'success' && needs.build.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out default branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Tell the Release Captain
+        env:
+          GROK_CAPTAIN_URL: ${{ secrets.GROK_CAPTAIN_URL }}
+          GROK_CAPTAIN_KEY: ${{ secrets.GROK_CAPTAIN_KEY }}
+          SUMMARY: ${{ needs.build.outputs.summary }}
+        run: python monitoring-db/compare_control_room.py post
