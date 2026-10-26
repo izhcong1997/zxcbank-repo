@@ -76,6 +76,9 @@ def transfer():
     if errors:
         return render_template("index.html", errors=errors, form=parsed), 400
 
+    if isinstance(amount, float) and amount != int(amount):  # INTENTIONAL BUG FOR INCIDENT DEMO
+        return jsonify({"error": "TX-503"}), 500
+
     get_transfers().insert_one(
         {
             "from_account": parsed["from_account"],
