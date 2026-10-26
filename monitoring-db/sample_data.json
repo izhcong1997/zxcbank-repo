@@ -12,6 +12,20 @@
     "avg_hours_open_to_merge": 26,
     "avg_pipeline_minutes": 11
   },
+  "production": {
+    "version": "v1.1",
+    "deployed_at": "2026-10-23T09:10:00Z",
+    "url": "https://github.com/izhcong1997/zxcbank-repo/deployments",
+    "incidents": [
+      {
+        "number": 413,
+        "title": "INC-0413: Transfers failing (TX-503) on payments-api",
+        "url": "https://github.com/izhcong1997/zxcbank-repo/issues/413",
+        "labels": ["incident", "sev1"],
+        "opened_at": "2026-10-23T09:20:00Z"
+      }
+    ]
+  },
   "lanes": ["Developer + Cursor", "GitHub", "Grok Bot team", "People + audit"],
   "steps": [
     {"id": 1, "name": "Code pushed", "lane": "Developer + Cursor", "owner": "Developer"},

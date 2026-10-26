@@ -1,0 +1,28 @@
+services:
+  payments-api:
+    team: Payments
+    on_call: Sean Lim
+    email: izhcong1997.sean@gmail.com
+    files:
+      - app.py
+      - db.py
+      - templates/index.html
+    runbook: Roll back to the last good release, then fix forward
+
+  lending:
+    team: Lending
+    on_call: Lending desk
+    email: lending-oncall@zxcbank.example
+    files:
+      - loans.py
+      - applications
+    runbook: Pause new applications, then roll back the lending service.
+
+  customer-care:
+    team: Customer Care
+    on_call: Customer Care desk
+    email: care-oncall@zxcbank.example
+    files:
+      - cases.py
+      - inbox
+    runbook: Move the contact centre to the backup queue, then roll back.

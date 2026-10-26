@@ -54,6 +54,10 @@ Business Reporter emails Sean, first Blocked and then Ready. That comes from `re
 
 Dots: grey not started, blue in progress, green done, red blocked or failed, amber waiting on a human.
 
+## Production
+
+The Production panel shows the latest successful deployment to the `production` environment, when that status was created, and every open issue labelled `incident` with its labels and age. A missing deployment says "Nothing deployed yet". A 403 or 404 says "Not available".
+
 ## Token
 
-Fine-grained, this repository only, all read: Contents, Pull requests, Issues, Actions, Checks, Code scanning alerts. A 403 or 404 on one endpoint shows "not available" and does not stop the page.
+Fine-grained, this repository only, all read: Contents, Deployments, Pull requests, Issues, Actions, Checks, Code scanning alerts. A 403 or 404 on one endpoint shows "not available" and does not stop the page.
